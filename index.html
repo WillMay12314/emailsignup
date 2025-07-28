@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: 
+                linear-gradient(45deg, #0a0a0a 0%, #1c2526 50%, #0a0a0a 100%),
+                radial-gradient(circle at 20% 80%, #2e2e2e, #000 60%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(255, 255, 255, 0.1) 100%);
+            background-size: 300% 300%, 200% 200%, 400% 400%;
+            animation: waveFlow 12s ease-in-out infinite;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        @keyframes waveFlow {
+            0% {
+                background-position: 0% 50%, 50% 50%, 100% 50%;
+            }
+            50% {
+                background-position: 100% 50%, 0% 50%, 0% 50%;
+            }
+            100% {
+                background-position: 0% 50%, 50% 50%, 100% 50%;
+            }
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        p {
+            color: #d0d0d0;
+        }
+
+        input[type="email"] {
+            padding: 0.5rem;
+            width: 200px;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #DC143C;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #B22222;
+        }
+
+        #message {
+            margin-top: 1rem;
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add AI to Your Improvement</h1>
+        <p>Stay ahead of your competition with daily Self-Improvement and AI insights</p>
+        <input type="email" id="emailInput" placeholder="Enter your email" required>
+        <br>
+        <button onclick="subscribe()">Subscribe</button>
+        <p id="message"></p>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+    <script>
+        // Initialize Firebase (replace with your Firebase config)
+        const firebaseConfig = {
+  apiKey: "AIzaSyDNqmVmYrhsTIJYYQhKMHpMWaKJ7Jh9eyc",
+  authDomain: "bywillmay.firebaseapp.com",
+  projectId: "bywillmay",
+  storageBucket: "bywillmay.firebasestorage.app",
+  messagingSenderId: "976672488114",
+  appId: "1:976672488114:web:fb8fa886c053cd0e7f67ab",
+  measurementId: "G-KEMJ749Y1V"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function subscribe() {
+            const emailInput = document.getElementById('emailInput');
+            const message = document.getElementById('message');
+            const email = emailInput.value.trim();
+
+            // Basic email validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                message.textContent = 'Please enter a valid email address.';
+                message.classList.add('error');
+                return;
+            }
+
+            try {
+                // Check if email already exists
+                const querySnapshot = await db.collection('subscribers')
+                    .where('email', '==', email)
+                    .get();
+
+                if (!querySnapshot.empty) {
+                    message.textContent = 'This email is already subscribed!';
+                    message.classList.add('error');
+                    return;
+                }
+
+                // Store email in Firestore
+                await db.collection('subscribers').add({
+                    email: email,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                message.textContent = 'Thank you for subscribing!';
+                message.classList.remove('error');
+                emailInput.value = '';
+            } catch (error) {
+                console.error('Error adding email: ', error);
+                message.textContent = 'An error occurred. Please try again.';
+                message.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
